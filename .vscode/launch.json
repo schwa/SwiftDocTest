@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug SwiftDocTest",
+            "program": "${workspaceFolder:SwiftDocTest}/.build/debug/SwiftDocTest",
+            "args": [],
+            "cwd": "${workspaceFolder:SwiftDocTest}",
+            "preLaunchTask": "swift: Build Debug SwiftDocTest"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release SwiftDocTest",
+            "program": "${workspaceFolder:SwiftDocTest}/.build/release/SwiftDocTest",
+            "args": [],
+            "cwd": "${workspaceFolder:SwiftDocTest}",
+            "preLaunchTask": "swift: Build Release SwiftDocTest"
+        }
+    ]
+}

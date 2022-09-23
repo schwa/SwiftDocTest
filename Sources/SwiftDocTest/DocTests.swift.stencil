@@ -1,0 +1,19 @@
+import XCTest
+@testable import {{ module.name }}
+
+{% for source in module.sources %} // strip
+{% if source.tests %} // strip
+final class {{ source.name | makeIdentifier }}_DocTests: XCTestCase {
+    {% for test in source.tests %} // strip
+    func test_{{ test.name }}() throws {
+        {% if test.preamble %} // strip
+        {{ test.preamble }}
+        {% endif %} // strip
+        XCTAssertEqual({{ test.condition }}, {{ test.expectedResult }})
+    }
+
+    {% endfor %} // strip
+}    
+
+{% endif %} // strip
+{% endfor %} // strip
