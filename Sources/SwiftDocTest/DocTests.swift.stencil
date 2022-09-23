@@ -6,10 +6,12 @@ import XCTest
 final class {{ source.name | makeIdentifier }}_DocTests: XCTestCase {
     {% for test in source.tests %} // strip
     func test_{{ test.name }}() throws {
-        {% if test.preamble %} // strip
-        {{ test.preamble }}
+        {% for assertion in test.assertions %} // strip
+        {% if assertion.preamble %} // strip
+        {{ assertion.preamble }}
         {% endif %} // strip
-        XCTAssertEqual({{ test.condition }}, {{ test.expectedResult }})
+        XCTAssertEqual({{ assertion.condition }}, {{ assertion.expectedResult }})
+        {% endfor %} // strip
     }
 
     {% endfor %} // strip

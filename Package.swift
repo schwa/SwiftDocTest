@@ -42,7 +42,7 @@ let package = Package(
                 ]),
         .testTarget(
             name: "SwiftDocTestTests",
-            dependencies: ["SwiftDocTest"]
+            dependencies: ["SwiftDocTestSupport"]
         ),
     ]
 )
