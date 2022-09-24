@@ -6,6 +6,7 @@ srcdir = Sources
 
 REPODIR = $(shell pwd)
 BUILDDIR = $(REPODIR)/.build
+STYLE = debug
 SOURCES = $(wildcard $(srcdir)/**/*.swift)
 
 .DEFAULT_GOAL = all
@@ -15,14 +16,14 @@ all: swift-doctest
 
 swift-doctest: $(SOURCES)
 	@swift build \
-		-c release \
+        --configuration "$(STYLE)" \
 		--disable-sandbox \
 		--scratch-path "$(BUILDDIR)"
 
 .PHONY: install
 install: swift-doctest
 	@install -d "$(bindir)"
-	@install "$(BUILDDIR)/release/SwiftDocTest" "$(bindir)"
+	@install "$(BUILDDIR)/$(STYLE)/SwiftDocTest" "$(bindir)"
 
 .PHONY: uninstall
 uninstall:
@@ -30,7 +31,7 @@ uninstall:
 
 .PHONY: clean
 distclean:
-	@rm -f $(BUILDDIR)/release
+	@rm -f $(BUILDDIR)/$(STYLE)
 
 .PHONY: clean
 clean: distclean

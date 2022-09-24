@@ -35,7 +35,7 @@ let package = Package(
                     .copy("DocTests.swift.stencil")
                 ]),
         .testTarget(
-            name: "SwiftDocTestTests",
+            name: "SwiftDocTestSupportTests",
             dependencies: ["SwiftDocTestSupport"]
         ),
     ]
