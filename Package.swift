@@ -8,6 +8,9 @@ let package = Package(
     platforms: [
         .macOS("13"),
     ],
+    products: [
+        .plugin(name: "MyCommandPlugin", targets: ["MyCommandPlugin"]),
+    ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-syntax.git", branch: "main"),
@@ -24,6 +27,14 @@ let package = Package(
             ],
             path: "Sources/SwiftDocTest"
         ),
+        .plugin(
+            name: "MyCommandPlugin",
+            capability: .command(intent: .custom(verb: "TODO", description: "TODO"), permissions: [.writeToPackageDirectory(reason: "TODO")]),
+//            capability: .buildTool(),
+            dependencies: [
+                .product(name: "Everything", package: "Everything"),
+                "SwiftDocTestSupport",
+            ]),
         .target(name: "SwiftDocTestSupport",
                 dependencies: [
                     .product(name: "ArgumentParser", package: "swift-argument-parser"),
