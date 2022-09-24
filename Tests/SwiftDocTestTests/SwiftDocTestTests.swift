@@ -1,7 +1,7 @@
 @testable import SwiftDocTestSupport
 import XCTest
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 
 final class TriviaToDocTestTests: XCTestCase {
     func testTriviaToDocTestPositive() throws {
@@ -55,7 +55,7 @@ final class TrivaToDocTestTests: XCTestCase {
         ```
         */
         """
-        let syntax = try SyntaxParser.parse(source: source)
+        let syntax = try Parser.parse(source: source)
         let tests = try syntax.docTests
         XCTAssertEqual(tests.count, 1)
         XCTAssertEqual(tests[0].assertions.count, 2)

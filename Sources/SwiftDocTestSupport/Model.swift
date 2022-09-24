@@ -1,5 +1,5 @@
 import Everything
-import SwiftSyntaxParser
+import SwiftParser
 
 public struct Module {
     public let path: FSPath
@@ -28,7 +28,8 @@ public struct Source {
     public init(path: FSPath) throws {
         self.path = path
         name = path.stem
-        let syntax = try SyntaxParser.parse(path.url)
+        let source = try String(contentsOf: path.url)
+        let syntax = try Parser.parse(source: source)
         tests = try syntax.docTests
     }
 }
