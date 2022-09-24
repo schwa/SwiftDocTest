@@ -54,6 +54,7 @@ final class TrivaToDocTestTests: XCTestCase {
         2 + 4 // => 4
         ```
         */
+        func foo() {}
         """
         let syntax = try Parser.parse(source: source)
         let tests = try syntax.docTests

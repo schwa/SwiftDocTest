@@ -1,15 +1,13 @@
-import CryptoKit
 import Foundation
-import RegexBuilder
 import SwiftSyntax
 
-public extension SyntaxProtocol {
-    func walk(_ visitor: (_ syntax: SyntaxProtocol, _ skip: inout Bool, _ stop: inout Bool, _ depth: Int) throws -> Void) rethrows {
-        func walk(element: SyntaxProtocol, stop: inout Bool, depth: Int, _ visitor: (_ syntax: SyntaxProtocol, _ skip: inout Bool, _ stop: inout Bool, _ depth: Int) throws -> Void) rethrows {
+public extension Syntax {
+    func walk(_ visitor: (_ syntax: Syntax, _ skip: inout Bool, _ stop: inout Bool, _ depth: Int) throws -> Void) rethrows {
+        func walk(element: Syntax, stop: inout Bool, depth: Int, _ visitor: (_ syntax: Syntax, _ skip: inout Bool, _ stop: inout Bool, _ depth: Int) throws -> Void) rethrows {
             var skip = false
             try visitor(element, &skip, &stop, depth)
             if !skip && !stop {
-                for child in element.children {
+                for child in element.children(viewMode: .all) {
                     try walk(element: child, stop: &stop, depth: depth + 1, visitor)
                 }
             }
@@ -19,96 +17,109 @@ public extension SyntaxProtocol {
     }
 }
 
-public extension TriviaPiece {
+public extension SyntaxProtocol {
 
-    private static let docTestRegex = Regex {
-        "/**\n"
-        ZeroOrMore {
-            ZeroOrMore(.any)
-            "\n"
+    var ancestors: [Syntax] {
+        guard let parent else {
+            return []
         }
-        "```swift doctest\n"
-        Capture {
-            OneOrMore {
-                OneOrMore(.any)
-                "\n"
-            }
-        }
-        "```\n"
-        "*/"
+        return [parent] + parent.ancestors
     }
 
-    var docTest: String? {
-        get throws {
-            switch self {
-            case .docBlockComment(let comment):
-                let comment = comment.lines.map { $0.trimmingCharacters(in: .whitespaces) }.joined(separator: "\n")
-                guard let match = try Self.docTestRegex.firstMatch(in: comment) else {
-                    return nil
-                }
-                return String(match.1)
-            default:
+    func firstAncestor(where test: (Syntax) -> Bool) -> Syntax? {
+        guard let parent else {
+            return nil
+        }
+        if test(parent) == true {
+            return parent
+        }
+        else {
+            return parent.firstAncestor(where: test)
+        }
+    }
+
+    var onlyChildToken: TokenSyntax? {
+        guard children(viewMode: .all).count == 1 else {
+            return nil
+        }
+        return children(viewMode: .all).first(of: TokenSyntax.self)
+    }
+
+
+    var nextSyntax: Syntax? {
+        guard let siblings = parent?.children(viewMode: .all) else {
+            return nil
+        }
+        let index = siblings.firstIndex(of: Syntax(self))!
+        guard index < siblings.endIndex else {
+            return nil
+        }
+        let nextIndex = siblings.index(after: index)
+        let nextSyntax = siblings[nextIndex]
+        return nextSyntax
+    }
+
+    func recursiveFindFirst <S>(of type: S.Type) -> S? where S: SyntaxProtocol {
+        var result: S?
+        Syntax(fromProtocol: self).walk { syntax, stop, skip, depth in
+            if syntax.is(type) {
+                result = syntax.as(type)
+                stop = true
+            }
+        }
+        return result
+    }
+}
+
+public extension Collection where Element == Syntax {
+    func first<S>(of type: S.Type) -> S? where S: SyntaxProtocol {
+        guard let first = first(where: { $0.is(type) }) else {
+            return nil
+        }
+        return first.as(type)
+    }
+}
+
+public extension DeclSyntaxProtocol {
+    // TODO: Should never return nil
+    var name: String? {
+        guard let firstToken = children(viewMode: .all).first(of: TokenSyntax.self) else {
+            return nil
+        }
+        switch firstToken.tokenKind {
+        case .structKeyword, .classKeyword, .extensionKeyword, .enumKeyword, .protocolKeyword, .funcKeyword, .typealiasKeyword, .associatedtypeKeyword:
+            guard let nextSyntax = firstToken.nextSyntax else {
                 return nil
             }
-        }
-    }
-}
-
-public extension Trivia {
-    var docTests: [String] {
-        get throws {
-            try compactMap { try $0.docTest }
-        }
-    }
-}
-
-public extension SyntaxProtocol {
-    var docTests: [Test] {
-        get throws {
-            var allDocComments: [String] = []
-            try walk { element, _, _, _ in
-                if let token = Syntax(fromProtocol: element).as(TokenSyntax.self) {
-                    if let leadingTrivia = token.leadingTrivia, !leadingTrivia.isEmpty {
-                        allDocComments += try leadingTrivia.docTests
-                    }
-                }
+            if let simpleType = nextSyntax.as(SimpleTypeIdentifierSyntax.self) {
+                return simpleType.onlyChildToken!.text
             }
-            let tests = try allDocComments.map { docComment in
-                try Test(docComment: docComment)
-            }
-            return tests
-        }
-    }
-}
-
-extension Test {
-
-    static let assertionRegex = Regex {
-        Capture {
-            OneOrMore(.any)
-        }
-        " // => "
-        Capture {
-            OneOrMore(.any)
-        }
-    }
-
-    init(docComment: String) throws {
-        var preambles: [String] = []
-        var assertions: [Assertion] = []
-        for line in docComment.lines {
-            if let match = try Self.assertionRegex.firstMatch(in: line) {
-                let preamble = preambles.isEmpty ? nil : preambles.joined(separator: "\n")
-                assertions.append(.init(preamble: preamble, condition: String(match.1), expectedResult: String(match.2)))
-                preambles = []
+            else if let memberType = nextSyntax.as(MemberTypeIdentifierSyntax.self) {
+                //return memberType.name
+                fatalError()
             }
             else {
-                preambles.append(String(line))
+                return nextSyntax.as(TokenSyntax.self)!.text
             }
+        case .caseKeyword:
+            guard let nextSyntax = firstToken.nextSyntax, let enumCaseElement = nextSyntax.recursiveFindFirst(of: EnumCaseElementSyntax.self) else {
+                fatalError()
+            }
+            return enumCaseElement.firstToken!.text
+        case .varKeyword, .letKeyword:
+            guard let patternBindingList = firstToken.nextSyntax?.as(PatternBindingListSyntax.self) else {
+                fatalError("Could not find a PatternBindingListSyntax.")
+            }
+            guard let identifierPattern = patternBindingList.recursiveFindFirst(of: IdentifierPatternSyntax.self) else {
+                fatalError("Could not find a IdentifierPatternSyntax.")
+            }
+            return identifierPattern.onlyChildToken!.text
+        default:
+            return nil
         }
-        let hash = SHA256.hash(data: docComment.data(using: .utf8)!).map {
-            "0" + String($0, radix: 16).prefix(2)
-        }.joined()
-        self = Test(name: String(hash.prefix(8)), assertions: assertions)
+    }
+
+    var scopedName: String? {
+        fatalError()
     }
 }
