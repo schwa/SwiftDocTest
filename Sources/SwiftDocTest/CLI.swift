@@ -7,11 +7,7 @@ import SwiftDocTestSupport
 
 @main
 struct SwiftDocTest: ParsableCommand {
-    //    @Flag(help: "Include a counter with each repetition.")
-    //    var includeCounter = false
-    //
-    //    var count: Int?
-    //
+
     @Option(name: .shortAndLong, help: "Path to swift package.")
     var package: FSPath
 
