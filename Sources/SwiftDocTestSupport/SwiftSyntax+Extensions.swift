@@ -7,7 +7,7 @@ public extension Syntax {
             var skip = false
             try visitor(element, &skip, &stop, depth)
             if !skip && !stop {
-                for child in element.children(viewMode: .all) {
+                for child in element.children(viewMode: .sourceAccurate) {
                     try walk(element: child, stop: &stop, depth: depth + 1, visitor)
                 }
             }
@@ -19,11 +19,15 @@ public extension Syntax {
 
 public extension SyntaxProtocol {
 
+    var sourceAccurateChildren: SyntaxChildren {
+        children(viewMode: .sourceAccurate)
+    }
+
     var ancestors: [Syntax] {
         guard let parent else {
             return []
         }
-        return [parent] + parent.ancestors
+        return parent.ancestors + [parent]
     }
 
     func firstAncestor(where test: (Syntax) -> Bool) -> Syntax? {
@@ -39,15 +43,22 @@ public extension SyntaxProtocol {
     }
 
     var onlyChildToken: TokenSyntax? {
-        guard children(viewMode: .all).count == 1 else {
+        guard children(viewMode: .sourceAccurate).count == 1 else {
             return nil
         }
-        return children(viewMode: .all).first(of: TokenSyntax.self)
+        return children(viewMode: .sourceAccurate).first(of: TokenSyntax.self)
     }
 
+//    var previousSyntaxes: SyntaxChildren.SubSequence {
+//
+//    }
+//
+//    var nextSyntaxes: SyntaxChildren.SubSequence {
+//
+//    }
 
     var nextSyntax: Syntax? {
-        guard let siblings = parent?.children(viewMode: .all) else {
+        guard let siblings = parent?.children(viewMode: .sourceAccurate) else {
             return nil
         }
         let index = siblings.firstIndex(of: Syntax(self))!
@@ -83,7 +94,7 @@ public extension Collection where Element == Syntax {
 public extension DeclSyntaxProtocol {
     // TODO: Should never return nil
     var name: String? {
-        guard let firstToken = children(viewMode: .all).first(of: TokenSyntax.self) else {
+        guard let firstToken = children(viewMode: .sourceAccurate).first(of: TokenSyntax.self) else {
             return nil
         }
         switch firstToken.tokenKind {
@@ -95,7 +106,6 @@ public extension DeclSyntaxProtocol {
                 return simpleType.onlyChildToken!.text
             }
             else if let memberType = nextSyntax.as(MemberTypeIdentifierSyntax.self) {
-                //return memberType.name
                 fatalError()
             }
             else {
