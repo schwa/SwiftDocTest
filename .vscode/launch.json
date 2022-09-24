@@ -17,6 +17,24 @@
             "args": [],
             "cwd": "${workspaceFolder:SwiftDocTest}",
             "preLaunchTask": "swift: Build Release SwiftDocTest"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug swift-doc-test",
+            "program": "${workspaceFolder:SwiftDocTest}/.build/debug/swift-doc-test",
+            "args": [],
+            "cwd": "${workspaceFolder:SwiftDocTest}",
+            "preLaunchTask": "swift: Build Debug swift-doc-test"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release swift-doc-test",
+            "program": "${workspaceFolder:SwiftDocTest}/.build/release/swift-doc-test",
+            "args": [],
+            "cwd": "${workspaceFolder:SwiftDocTest}",
+            "preLaunchTask": "swift: Build Release swift-doc-test"
         }
     ]
 }

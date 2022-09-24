@@ -9,27 +9,28 @@ let package = Package(
         .macOS("13"),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", branch: "main"),
-        .package(url: "https://github.com/stencilproject/Stencil.git", from: "0.15.1"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", branch: "main"),
         .package(url: "https://github.com/schwa/Everything", branch: "main"),
+        .package(url: "https://github.com/stencilproject/Stencil.git", from: "0.15.1"),
     ],
     targets: [
         .executableTarget(
-            name: "SwiftDocTest",
+            name: "swift-doc-test",
             dependencies: [
                 "SwiftDocTestSupport",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "Everything",
-            ]
+            ],
+            path: "Sources/SwiftDocTest"
         ),
         .target(name: "SwiftDocTestSupport",
                 dependencies: [
+                    .product(name: "ArgumentParser", package: "swift-argument-parser"),
                     .product(name: "SwiftParser", package: "swift-syntax"),
                     .product(name: "SwiftSyntax", package: "swift-syntax"),
-                    "Stencil",
-                    .product(name: "ArgumentParser", package: "swift-argument-parser"),
                     "Everything",
+                    "Stencil",
                 ],
                 resources: [
                     .copy("DocTests.swift.stencil")

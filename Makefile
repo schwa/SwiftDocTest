@@ -23,11 +23,11 @@ swift-doctest: $(SOURCES)
 .PHONY: install
 install: swift-doctest
 	@install -d "$(bindir)"
-	@install "$(BUILDDIR)/$(STYLE)/SwiftDocTest" "$(bindir)"
+	@install "$(BUILDDIR)/$(STYLE)/swift-doc-test" "$(bindir)"
 
 .PHONY: uninstall
 uninstall:
-	@rm -rf "$(bindir)/SwiftDocTest"
+	@rm -rf "$(bindir)/swift-doc-test"
 
 .PHONY: clean
 distclean:
