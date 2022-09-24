@@ -19,14 +19,8 @@ let package = Package(
             name: "SwiftDocTest",
             dependencies: [
                 "SwiftDocTestSupport",
-                .product(name: "SwiftParser", package: "swift-syntax"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-                "Stencil",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "Everything",
-            ],
-            resources: [
-                .copy("DocTests.swift.stencil"),
             ]
         ),
         .target(name: "SwiftDocTestSupport",
@@ -38,7 +32,7 @@ let package = Package(
                     "Everything",
                 ],
                 resources: [
-                    //                    .copy("DocTests.swift.stencil")
+                    .copy("DocTests.swift.stencil")
                 ]),
         .testTarget(
             name: "SwiftDocTestTests",
