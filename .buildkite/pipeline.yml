@@ -1,5 +1,0 @@
-steps:
-    - command: "swift build"
-    - command: "swift test --enable-code-coverage"
-    # - command: "xcodebuild -scheme 'Everything' -allowProvisioningUpdates -destination 'generic/platform=macOS'"
-    # - command: "xcodebuild -scheme 'Everything' -allowProvisioningUpdates -destination 'generic/platform=iOS'"
